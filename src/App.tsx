@@ -1,54 +1,45 @@
-import { useState } from 'react'
-import './App.css'
+import "./App.css";
+import Navbar from "./components/common/Navbar";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+
+import Home from "./pages/Home";
+import Profile from "./pages/Profile/Profile";
+import { Themes } from "./pages/Themes";
+import Login from "./pages/Login";
+import Registration from "./pages/Registration";
+import Threads from "./pages/Thread/Threads";
+import ThemeStatistic from "./pages/ThemeStatictic";
+import LikedThreads from "./pages/Profile/LikedThreads";
+import Users from "./pages/Profile/Users";
+import Thread from "./pages/Thread/Thread";
 
 function App() {
-  const [count, setCount] = useState(0);
-
-  const toggleTheme = () => {
-    const html = document.documentElement;
-    html.dataset.theme =
-      html.dataset.theme === "dark" ? "light" : "dark";
-  };
-
   return (
-    <div className="min-h-screen bg-base-200">
-      <div className="navbar bg-base-100 shadow-md px-6">
-        <div className="flex-1">
-          <a className="text-xl font-bold text-primary">daisyUI App 🌼</a>
-        </div>
-        <div className="flex-none">
-          <button className="btn btn-ghost" onClick={toggleTheme}>
-            Toggle Theme
-          </button>
-        </div>
-      </div>
+    <Router>
+      <div className="min-h-screen flex flex-col bg-base-200 w-screen">
+        <Navbar />
 
-      <div className="flex flex-col items-center justify-center h-[80vh]">
-        <div className="card w-96 bg-base-100 shadow-xl">
-          <div className="card-body items-center text-center">
-            <h2 className="card-title">Counter Component</h2>
-            <p className="text-base-content">
-              Click the button to increase the count!
-            </p>
-            <div className="card-actions mt-4 flex flex-col gap-2">
-              <button
-                className="btn btn-primary w-full"
-                onClick={() => setCount((prev) => prev + 1)}
-              >
-                Count: {count}
-              </button>
-              <button
-                className="btn btn-outline w-full"
-                onClick={() => setCount(0)}
-              >
-                Reset
-              </button>
-            </div>
-          </div>
-        </div>
+        <main className="flex-1 w-full max-w-6xl mx-auto px-4 py-8">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/profilis" element={<Profile />}>
+              <Route path="megstami-irasai" element={<LikedThreads />} />
+              <Route path="naudotoju-sarasas" element={<Users />} />
+            </Route>
+            <Route path="/temos-forma" element={<Themes />} />
+            <Route path="/prisijungimas" element={<Login />} />
+            <Route path="/registracija" element={<Registration />} />
+            <Route path="/irasai/:themeId" element={<Threads />} />
+            <Route path="/irasai/:themeId/:postId" element={<Thread />} />
+            <Route
+              path="/temos-statistika/:themeId"
+              element={<ThemeStatistic />}
+            />
+          </Routes>
+        </main>
       </div>
-    </div>
+    </Router>
   );
 }
 
-export default App
+export default App;
