@@ -1,11 +1,14 @@
 import { useState } from "react";
 import type { ChangeEvent, FormEvent } from "react";
+import {useNavigate} from "react-router-dom";
 
-export function Themes() {
+export function CreateThemeForm() {
   const [title, setTitle] = useState<string>("");
   const [description, setDescription] = useState<string>("");
   const [image, setImage] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
+
+  const navigate = useNavigate()
 
   const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
@@ -35,6 +38,7 @@ export function Themes() {
     setDescription("");
     setImage(null);
     setPreview(null);
+    navigate("/")
   };
 
   return (

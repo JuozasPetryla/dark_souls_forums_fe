@@ -4,7 +4,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 import Home from "./pages/Home";
 import Profile from "./pages/Profile/Profile";
-import { Themes } from "./pages/Themes";
+import { CreateThemeForm } from "./pages/CreateThemeForm.tsx";
 import Login from "./pages/Login";
 import Registration from "./pages/Registration";
 import Threads from "./pages/Thread/Threads";
@@ -12,6 +12,10 @@ import ThemeStatistic from "./pages/ThemeStatictic";
 import LikedThreads from "./pages/Profile/LikedThreads";
 import Users from "./pages/Profile/Users";
 import Thread from "./pages/Thread/Thread";
+import {EditThemeForm} from "./pages/EditThemeForm.tsx";
+import EditProfile from "./pages/Profile/EditProfileForm.tsx";
+import GameStats from "./pages/Profile/GameStats.tsx";
+import CommentsSection from "./pages/Thread/CommentsSection.tsx";
 
 function App() {
   return (
@@ -25,16 +29,23 @@ function App() {
             <Route path="/profilis" element={<Profile />}>
               <Route path="megstami-irasai" element={<LikedThreads />} />
               <Route path="naudotoju-sarasas" element={<Users />} />
+              <Route path="redaguoti" element={<EditProfile/>} />
+              <Route path="zaidimu-statistika" element={<GameStats/>} />
             </Route>
-            <Route path="/temos-forma" element={<Themes />} />
+            <Route path="/temos-kurimo-forma" element={<CreateThemeForm />} />
+            <Route path="/temos-redagavimo-forma/:themeId" element={<EditThemeForm />} />
             <Route path="/prisijungimas" element={<Login />} />
             <Route path="/registracija" element={<Registration />} />
             <Route path="/irasai/:themeId" element={<Threads />} />
-            <Route path="/irasai/:themeId/:postId" element={<Thread />} />
-            <Route
-              path="/temos-statistika/:themeId"
-              element={<ThemeStatistic />}
-            />
+            <Route path="/irasai/:themeId/:postId" element={<Thread />}>
+              <Route path="redaguoti"/>
+              <Route path="komentarai" element={<CommentsSection/>}>
+                <Route path="prideti"/>
+                <Route path="redaguoti"/>
+                <Route path="santrumpa"/>
+              </Route>
+            </Route>
+            <Route path="/temos-statistika/:themeId" element={<ThemeStatistic />}/>
           </Routes>
         </main>
       </div>

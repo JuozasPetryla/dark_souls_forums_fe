@@ -28,7 +28,7 @@ export default function Home() {
           Temų sąrašas
         </h1>
 
-        <Link to="/temos-forma" className="btn btn-primary">
+        <Link to="/temos-kurimo-forma" className="btn btn-primary">
           ➕ Sukurti naują temą
         </Link>
       </div>
@@ -67,6 +67,12 @@ export default function Home() {
               >
                 Temos statistika
               </Link>
+              <Link to={`/temos-redagavimo-forma/${theme.id}`} className="btn btn-soft btn-primary btn-sm">
+                Redaguoti temą
+              </Link>
+              <button className="btn btn-soft btn-secondary btn-sm">
+                Šalinti temą
+              </button>
             </div>
           </div>
         ))}

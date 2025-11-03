@@ -15,6 +15,7 @@ export default function Navbar() {
             <li><Link to="/profilis">Profilis</Link></li>
             <li><Link to="/prisijungimas">Prisijungimas</Link></li>
             <li><Link to="/registracija">Registracija</Link></li>
+            <li><Link to="/prisijungimas">Atsijungti</Link></li>
           </ul>
         </div>
       </div>

@@ -13,6 +13,10 @@ export default function Profile() {
       <div className="flex flex-wrap justify-center gap-4">
         <Link to="megstami-irasai" className="btn btn-outline btn-primary">Pamegti irasai</Link>
         <Link to="naudotoju-sarasas" className="btn btn-outline btn-secondary">Susietu naudotoju sarasas</Link>
+        <button className="btn btn-primary">Susieti Steam paskyrą</button>
+        <Link to="zaidimu-statistika" className="btn btn-outline btn-primary">Zaidimu statistika</Link>
+        <Link to="redaguoti" className="btn btn-soft btn-primary">Redaguoti</Link>
+        <Link to="/" className="btn btn-soft btn-secondary">Šalinti</Link>
       </div>
 
       <div className="mt-8">
