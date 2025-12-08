@@ -1,25 +1,37 @@
 import { Link } from "react-router-dom";
+import { api } from "../api/apiClient";
+import type { ThemeResponse } from "../types/Theme";
+import { useEffect, useState } from "react";
 
 export default function Home() {
-  const mockThemes = [
-    {
-      id: 1,
-      title: "Kaip nugalėti Ornstein ir Smough?",
-      author: "Solaire of Astora",
-      date: "2025-10-20",
-      posts: 2,
-      description:
-        "Taktikos ir patarimai, kaip išgyventi vieną sunkiausių kovų žaidime.",
-    },
-    {
-      id: 2,
-      title: "Geriausi ginklai pradedantiesiems",
-      author: "Siegmeyer of Catarina",
-      date: "2025-10-22",
-      posts: 1,
-      description: "Palyginame efektyviausius ginklus žaidimo pradžiai.",
-    },
-  ];
+
+  const [themes, setThemes] = useState<ThemeResponse[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  
+
+  useEffect(() => {
+    async function loadThemes() {
+      try {
+        const data = await api.get<ThemeResponse[]>("topics/read");
+        setThemes(data);
+      } catch (error) {
+        console.error("Failed to fetch themes:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadThemes();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="max-w-5xl mx-auto mt-10 px-4 text-center">
+        <span className="loading loading-spinner loading-lg"></span>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-5xl mx-auto mt-10 px-4">
@@ -34,7 +46,7 @@ export default function Home() {
       </div>
 
       <div className="space-y-6">
-        {mockThemes.map((theme) => (
+        {themes.map((theme) => (
           <div
             key={theme.id}
             className="card bg-base-100 shadow-md hover:shadow-lg transition p-6"
@@ -44,17 +56,14 @@ export default function Home() {
                 {theme.title}
               </h2>
               <p className="text-sm text-base-content/60">
-                {new Date(theme.date).toLocaleDateString("lt-LT")}
+                {new Date(theme.modified_at).toLocaleDateString("lt-LT")}
               </p>
             </div>
 
-            <p className="mt-2 text-base-content/80">{theme.description}</p>
+            <p className="mt-2 text-base-content/80">Aprašymas</p>
 
             <div className="mt-4 flex flex-wrap justify-between items-center text-sm text-base-content/70">
-              <p>
-                Autorius: <span className="font-medium">{theme.author}</span>
-              </p>
-              <p>Įrašų: {theme.posts}</p>
+              <p>Įrašų: 1</p>
             </div>
 
             <div className="mt-4 flex flex-wrap gap-2 justify-end">

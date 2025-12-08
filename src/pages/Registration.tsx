@@ -1,26 +1,56 @@
 import { useState, type FormEvent } from "react";
+import { api } from "../api/apiClient";
+import { useNavigate } from "react-router-dom";
+import type { RegistrationResponse } from "../types/Auth";
 
 export default function Registration() {
-  const [username, setUsername] = useState("");
+  const [nickname, setNickname] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const [errorMsg, setErrorMsg] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setErrorMsg("");
 
     if (password !== confirm) {
-      alert("Slaptažodžiai nesutampa ⚠️");
-      return;
+      return setErrorMsg("Slaptažodžiai nesutampa ⚠️");
     }
 
-    console.log("Registration data:", { username, email, password });
-    alert("Registracija sėkminga (mock) 🎉");
+    setLoading(true);
 
-    setUsername("");
-    setEmail("");
-    setPassword("");
-    setConfirm("");
+    try {
+      const response = await api.post<RegistrationResponse>("/auth/register", {
+        nickname,
+        email,
+        password
+      });
+
+      const token: string = response.access_token;
+
+      localStorage.setItem("access_token", token);
+
+      alert("Registracija sėkminga!");
+
+      navigate("/profilis");
+
+    } catch (err: any) {
+      console.error("Registration failed:", err);
+
+      if (err.response?.status === 409) {
+        setErrorMsg("Vardas arba el. paštas jau užimti.");
+      } else {
+        setErrorMsg("Registracijos klaida. Bandykite dar kartą.");
+      }
+
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -28,17 +58,23 @@ export default function Registration() {
       <div className="card w-full max-w-md bg-base-100 shadow-xl p-8">
         <h1 className="text-3xl font-bold text-center mb-6">Registracija</h1>
 
+        {errorMsg && (
+          <div className="alert alert-error mb-4">
+            <span>{errorMsg}</span>
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="label">
-              <span className="label-text font-semibold">Vartotojo vardas</span>
+              <span className="label-text font-semibold">Slapyvardis</span>
             </label>
             <input
               type="text"
-              placeholder="Įveskite vardą"
+              placeholder="Įveskite slapyvardį"
               className="input input-bordered w-full"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              value={nickname}
+              onChange={(e) => setNickname(e.target.value)}
               required
             />
           </div>
@@ -85,8 +121,12 @@ export default function Registration() {
             />
           </div>
 
-          <button type="submit" className="btn btn-primary w-full mt-4">
-            Registruotis
+          <button
+            type="submit"
+            className="btn btn-primary w-full mt-4"
+            disabled={loading}
+          >
+            {loading ? "Registruojama..." : "Registruotis"}
           </button>
 
           <p className="text-center mt-3 text-sm">

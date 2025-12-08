@@ -1,6 +1,8 @@
 import { useState } from "react";
 import type { ChangeEvent, FormEvent } from "react";
-import {useNavigate} from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { api } from "../api/apiClient";
+import type { ThemeRequest } from "../types/Theme";
 
 export function CreateThemeForm() {
   const [title, setTitle] = useState<string>("");
@@ -8,7 +10,7 @@ export function CreateThemeForm() {
   const [image, setImage] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
@@ -23,29 +25,31 @@ export function CreateThemeForm() {
     }
   };
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
 
-    console.log({
+  try {
+    const createdTopic = await api.post<ThemeRequest>("/topics/create", {
       title,
-      description,
-      imageName: image?.name || "no image",
+      image_link: ""
     });
 
-    alert("Tema sukurta");
+    console.log("Created topic:", createdTopic);
 
     setTitle("");
     setDescription("");
-    setImage(null);
-    setPreview(null);
-    navigate("/")
-  };
+
+    navigate("/");
+  } catch (error) {
+    console.error("Failed to create topic:", error);
+    alert("Klaida kuriant temą. Patikrinkite duomenis.");
+  }
+};
+
 
   return (
     <div className="max-w-3xl mx-auto mt-10 bg-base-100 shadow-md rounded-lg p-8">
-      <h1 className="text-3xl font-bold text-center mb-6">
-        Sukurti naują temą
-      </h1>
+      <h1 className="text-3xl font-bold text-center mb-6">Sukurti naują temą</h1>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
@@ -85,7 +89,6 @@ export function CreateThemeForm() {
             className="file-input file-input-bordered w-full"
             onChange={handleImageChange}
           />
-
           {preview && (
             <div className="mt-4 flex justify-center">
               <img

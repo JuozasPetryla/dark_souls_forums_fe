@@ -1,40 +1,35 @@
-import { useState, useMemo } from "react";
+import { useState, useEffect } from "react";
 import type { ChangeEvent, FormEvent } from "react";
-import {useParams, useNavigate} from "react-router-dom";
-
-const mockThemes = [
-    {
-      id: 1,
-      title: "Kaip nugalėti Ornstein ir Smough?",
-      author: "Solaire of Astora",
-      date: "2025-10-20",
-      posts: 2,
-      description:
-        "Taktikos ir patarimai, kaip išgyventi vieną sunkiausių kovų žaidime.",
-    },
-    {
-      id: 2,
-      title: "Geriausi ginklai pradedantiesiems",
-      author: "Siegmeyer of Catarina",
-      date: "2025-10-22",
-      posts: 1,
-      description: "Palyginame efektyviausius ginklus žaidimo pradžiai.",
-    },
-  ];
+import { useParams, useNavigate } from "react-router-dom";
+import { api } from "../api/apiClient";
+import type { ThemeRequest, ThemeResponse } from "../types/Theme";
 
 export function EditThemeForm() {
   const { themeId } = useParams<{ themeId: string }>();
-  const selectedTheme = useMemo(
-    () => mockThemes.find((t) => t.id === Number(themeId)),
-    [themeId]
-  );
+  const navigate = useNavigate();
 
-  const [title, setTitle] = useState<string>(selectedTheme?.title ?? "");
-  const [description, setDescription] = useState<string>(selectedTheme?.description ?? "");
+  const [title, setTitle] = useState<string>("");
+  const [description, setDescription] = useState<string>("");
   const [image, setImage] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
 
-  const navigate = useNavigate()
+  useEffect(() => {
+    const fetchTopic = async () => {
+      try {
+        const response: ThemeResponse = await api.get(`/topics/read/${themeId}`);
+        const topic = response;
+
+        setTitle(topic.title);
+        setDescription("");
+        setPreview(null);
+      } catch (error) {
+        console.error("Failed to fetch topic:", error);
+        alert("Nepavyko gauti temos duomenų.");
+      }
+    };
+
+    if (themeId) fetchTopic();
+  }, [themeId]);
 
   const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
@@ -49,29 +44,31 @@ export function EditThemeForm() {
     }
   };
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    console.log({
-      title,
-      description,
-      imageName: image?.name || "no image",
-    });
+    try {
+      const updatedTopic = await api.put<ThemeRequest>(
+        `/topics/update/${themeId}`,
+        {
+          title,
+          image_link: ""
+        }
+      );
 
-    alert("Tema buvo redaguota");
+      console.log("Updated topic:", updatedTopic);
 
-    setTitle("");
-    setDescription("");
-    setImage(null);
-    setPreview(null);
-    navigate("/")
+      alert("Tema buvo redaguota");
+      navigate("/");
+    } catch (error) {
+      console.error("Failed to update topic:", error);
+      alert("Klaida redaguojant temą. Patikrinkite duomenis.");
+    }
   };
 
   return (
     <div className="max-w-3xl mx-auto mt-10 bg-base-100 shadow-md rounded-lg p-8">
-      <h1 className="text-3xl font-bold text-center mb-6">
-        Redaguoti temą
-      </h1>
+      <h1 className="text-3xl font-bold text-center mb-6">Redaguoti temą</h1>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
@@ -97,7 +94,6 @@ export function EditThemeForm() {
             placeholder="Įveskite temos aprašymą"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            required
           ></textarea>
         </div>
 
@@ -111,7 +107,6 @@ export function EditThemeForm() {
             className="file-input file-input-bordered w-full"
             onChange={handleImageChange}
           />
-
           {preview && (
             <div className="mt-4 flex justify-center">
               <img
