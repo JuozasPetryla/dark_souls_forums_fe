@@ -12,7 +12,7 @@ export default function Navbar() {
 
         <div className="flex justify-center flex-grow">
           <ul className="menu menu-horizontal px-1 flex-wrap">
-            <li><Link to="/profilis">Profilis</Link></li>
+            <li><Link to="/profilis/mano">Profilis</Link></li>
             <li><Link to="/prisijungimas">Prisijungimas</Link></li>
             <li><Link to="/registracija">Registracija</Link></li>
             <li><Link to="/prisijungimas">Atsijungti</Link></li>
