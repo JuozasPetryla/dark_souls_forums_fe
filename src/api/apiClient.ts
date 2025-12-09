@@ -50,6 +50,10 @@ class ApiClient {
   delete<T>(path: string): Promise<T> {
     return this.client.delete<T>(path).then((res) => res.data);
   }
+
+  patch<T, B>(path: string, body?: B): Promise<T> {
+    return this.client.patch<T>(path, body).then((res) => res.data);
+  }
 }
 
 export const api = new ApiClient(import.meta.env.VITE_API_URL ?? "http://localhost:8000/api/v1");

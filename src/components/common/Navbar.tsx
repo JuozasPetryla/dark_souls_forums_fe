@@ -40,7 +40,7 @@ export default function Navbar() {
           <ul className="menu menu-horizontal px-1 flex-wrap">
             {loggedIn && (
               <>
-                <li><Link to="/profilis">Profilis</Link></li>
+                <li><Link to="/profilis/mano">Profilis</Link></li>
                 <li><button onClick={handleLogout} className="btn btn-ghost">Atsijungti</button></li>
               </>
             )}
