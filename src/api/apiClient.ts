@@ -39,8 +39,8 @@ class ApiClient {
     return this.client.get<T>(path, { params }).then((res) => res.data);
   }
 
-  post<T, B = unknown>(path: string, body?: B): Promise<T> {
-    return this.client.post<T>(path, body).then((res) => res.data);
+  post<T, B = unknown>(path: string, body?: B, config?: AxiosRequestConfig): Promise<T> {
+    return this.client.post<T>(path, body, config).then((res) => res.data);
   }
 
   put<T, B = unknown>(path: string, body?: B): Promise<T> {
