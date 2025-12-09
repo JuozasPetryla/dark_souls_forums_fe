@@ -13,6 +13,7 @@ export interface Comment {
   userVote?: "positive" | "negative" | null;
   rating_id?: number | null;
   author_id?: number;
+  comment_iq?: number | null
 }
 
 
@@ -97,7 +98,8 @@ export default function CommentSection() {
           upvotes: 0,
           downvotes: 0,
           userVote: null,
-          rating_id: null
+          rating_id: null,
+          comment_iq: null
         }
       ]);
 
@@ -145,74 +147,113 @@ export default function CommentSection() {
 
     {/* Comments List */}
     {comments.map(comment => (
-      <div key={comment.id} className="flex items-start gap-4">
-        {/* Comment Content */}
-        <div className="flex-1 bg-white p-4 rounded-lg shadow-md border border-gray-200 relative">
-          <div className="flex justify-between items-start mb-2">
-            <div>
-              <span className="font-semibold text-gray-800">{comment.author}</span>
-              <span className="ml-2 text-xs text-gray-500">{comment.date}</span>
-            </div>
-            {comment.author_id === currentUserId && (
-            <div className="flex gap-2">
-              <button
-                className="p-1 hover:opacity-70"
-                onClick={() => {
-                  setEditingId(comment.id);
-                  setEditingText(comment.text);
-                }}
-              >
-                <img src="/src/assets/edit.svg" alt="edit" className="w-5 h-5" />
-              </button>
-              <button className="p-1 hover:opacity-70" onClick={() => deleteComment(comment.id)}>
-                <img src="/src/assets/trash.svg" alt="delete" className="w-5 h-5" />
-              </button>
-            </div>
-            )}
+  <div key={comment.id} className="flex items-start gap-4">
+    {/* Comment Content */}
+    <div className="flex-1 bg-white p-4 rounded-lg shadow-md border border-gray-200 relative">
+      <div className="flex justify-between items-start mb-2">
+        <div>
+          <span className="font-semibold text-gray-800">{comment.author}</span>
+          <span className="ml-2 text-xs text-gray-500">{comment.date}</span>
+        </div>
+        {comment.author_id === currentUserId && (
+          <div className="flex gap-2">
+            <button
+              className="p-1 hover:opacity-70"
+              onClick={() => {
+                setEditingId(comment.id);
+                setEditingText(comment.text);
+              }}
+            >
+              <img src="/src/assets/edit.svg" alt="edit" className="w-5 h-5" />
+            </button>
+            <button
+              className="p-1 hover:opacity-70"
+              onClick={() => deleteComment(comment.id)}
+            >
+              <img src="/src/assets/trash.svg" alt="delete" className="w-5 h-5" />
+            </button>
           </div>
+        )}
+      </div>
 
-          {editingId === comment.id ? (
-            <div className="space-y-2 mt-2">
-              <textarea
-                value={editingText}
-                onChange={e => setEditingText(e.target.value)}
-                rows={3}
-                className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none text-black"
-              />
-              <div className="flex justify-end gap-2">
-                <button onClick={() => saveEdit(comment.id)} className="btn btn-soft btn-primary">
-                  Save
-                </button>
-                <button onClick={() => setEditingId(null)} className="btn btn-soft btn-primary">
-                  Cancel
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div className="mt-1">
-              <p className="text-gray-700 leading-relaxed text-left">{comment.text}</p>
-            </div>
+      {editingId === comment.id ? (
+        <div className="space-y-2 mt-2">
+          <textarea
+            value={editingText}
+            onChange={e => setEditingText(e.target.value)}
+            rows={3}
+            className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none text-black"
+          />
+          <div className="flex justify-end gap-2">
+            <button onClick={() => saveEdit(comment.id)} className="btn btn-soft btn-primary">
+              Save
+            </button>
+            <button onClick={() => setEditingId(null)} className="btn btn-soft btn-primary">
+              Cancel
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="mt-1">
+          <p className="text-gray-700 leading-relaxed text-left">{comment.text}</p>
+
+          {/* Display IQ if calculated */}
+          {comment.comment_iq !== null && (
+            <p className="mt-2 font-semibold text-indigo-700">
+              Comment IQ: {comment.comment_iq}
+            </p>
+          )}
+
+          {/* Calculate IQ button if not yet calculated */}
+          {comment.comment_iq === null && (
+            <button
+              className="mt-2 btn btn-sm btn-outline btn-primary"
+              onClick={async () => {
+                try {
+                  const res = await api.post(
+                    `/api/v1/comments/${comment.id}/calculate-iq`,
+                    { text: comment.text }
+                  );
+                  // Update the comment in state
+                  setComments(prev =>
+                    prev.map(c =>
+                      c.id === comment.id ? { ...c, comment_iq: res.data.comment_iq } : c
+                    )
+                  );
+                } catch (err) {
+                  console.error("Failed to calculate IQ", err);
+                }
+              }}
+            >
+              Calculate IQ
+            </button>
           )}
         </div>
+      )}
+    </div>
 
-        {/* Vote Column */}
-        <div className="flex flex-col items-center">
-          <button
-            onClick={() => handleVote(comment, "positive", setComments)}
-            className={`p-0.5 hover:opacity-70 ${comment.userVote === "positive" ? "!bg-blue-500 !border-[1px] !border-black" : ""}`}
-          >
-            <img src="/src/assets/arrow.svg" alt="upvote" className="w-5 h-5 rotate-270 relative z-10" />
-          </button>
-          <span className="text-sm my-2"></span>
-          <button
-            onClick={() => handleVote(comment, "negative", setComments)}
-            className={`p-0.5 hover:opacity-70 ${comment.userVote === "negative" ? "!bg-red-500 !border-[1px] !border-black" : ""}`}
-          >
-            <img src="/src/assets/arrow.svg" alt="downvote" className="w-5 h-5 rotate-90 relative z-10" />
-          </button>
-        </div>
-      </div>
-    ))}
+    {/* Vote Column */}
+    <div className="flex flex-col items-center">
+      <button
+        onClick={() => handleVote(comment, "positive", setComments)}
+        className={`p-0.5 hover:opacity-70 ${
+          comment.userVote === "positive" ? "!bg-blue-500 !border-[1px] !border-black" : ""
+        }`}
+      >
+        <img src="/src/assets/arrow.svg" alt="upvote" className="w-5 h-5 rotate-270 relative z-10" />
+      </button>
+      <span className="text-sm my-2"></span>
+      <button
+        onClick={() => handleVote(comment, "negative", setComments)}
+        className={`p-0.5 hover:opacity-70 ${
+          comment.userVote === "negative" ? "!bg-red-500 !border-[1px] !border-black" : ""
+        }`}
+      >
+        <img src="/src/assets/arrow.svg" alt="downvote" className="w-5 h-5 rotate-90 relative z-10" />
+      </button>
+    </div>
+  </div>
+))}
   </div>
 
 
