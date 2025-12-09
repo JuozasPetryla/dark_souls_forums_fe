@@ -31,6 +31,7 @@ export function CreateThemeForm() {
   try {
     const createdTopic = await api.post<ThemeRequest>("/topics/create", {
       title,
+      description,
       image_link: ""
     });
 
@@ -75,7 +76,6 @@ export function CreateThemeForm() {
             placeholder="Įveskite temos aprašymą"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            required
           ></textarea>
         </div>
 

@@ -20,7 +20,7 @@ export function EditThemeForm() {
         const topic = response;
 
         setTitle(topic.title);
-        setDescription("");
+        setDescription(topic.description);
         setPreview(null);
       } catch (error) {
         console.error("Failed to fetch topic:", error);
@@ -52,6 +52,7 @@ export function EditThemeForm() {
         `/topics/update/${themeId}`,
         {
           title,
+          description,
           image_link: ""
         }
       );
