@@ -39,11 +39,6 @@ function App() {
             <Route path="/irasai/:themeId" element={<Threads />} />
             <Route path="/irasai/:themeId/:postId" element={<Thread />}>
               <Route path="redaguoti"/>
-              <Route path="komentarai" element={<CommentsSection/>}>
-                <Route path="prideti"/>
-                <Route path="redaguoti"/>
-                <Route path="santrumpa"/>
-              </Route>
             </Route>
             <Route path="/temos-statistika/:themeId" element={<ThemeStatistic />}/>
           </Routes>
