@@ -13,6 +13,10 @@ export function EditThemeForm() {
   const [image, setImage] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
 
+  type UploadImageResponse = {
+    url: string;
+  };
+
   useEffect(() => {
     const fetchTopic = async () => {
       try {
@@ -20,8 +24,8 @@ export function EditThemeForm() {
         const topic = response;
 
         setTitle(topic.title);
-        setDescription("");
-        setPreview(null);
+        setDescription(topic.description);
+        setPreview(topic.image ? topic.image : null);
       } catch (error) {
         console.error("Failed to fetch topic:", error);
         alert("Nepavyko gauti temos duomenų.");
@@ -48,18 +52,43 @@ export function EditThemeForm() {
     e.preventDefault();
 
     try {
+      let imageUrl = preview || ""; // existing image URL from the topic
+
+      // 1. Upload new image if user selected one
+      if (image) {
+        const formData = new FormData();
+        formData.append("image", image);
+
+        const uploadRes = await api.post<UploadImageResponse>(
+          `/topics/upload-image`,
+          formData,
+          { headers: { "Content-Type": "multipart/form-data" } }
+        );
+
+        imageUrl = uploadRes.url; // use the new image URL
+      }
+
+      // 2. Update topic
       const updatedTopic = await api.put<ThemeRequest>(
         `/topics/update/${themeId}`,
         {
           title,
-          image_link: ""
+          description,
+          image_link: imageUrl,
         }
       );
 
       console.log("Updated topic:", updatedTopic);
-
       alert("Tema buvo redaguota");
+
+      // Clear form / reset state if needed
+      setTitle("");
+      setDescription("");
+      setImage(null);
+      setPreview(null);
+
       navigate("/");
+
     } catch (error) {
       console.error("Failed to update topic:", error);
       alert("Klaida redaguojant temą. Patikrinkite duomenis.");
@@ -110,7 +139,7 @@ export function EditThemeForm() {
           {preview && (
             <div className="mt-4 flex justify-center">
               <img
-                src={preview}
+                src={image ? preview : `http://localhost:8000${preview}`}
                 alt="Preview"
                 className="rounded-lg max-h-60 object-contain border border-base-300"
               />

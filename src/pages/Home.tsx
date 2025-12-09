@@ -33,6 +33,19 @@ export default function Home() {
     );
   }
 
+  const deleteTheme = (themeId: number) => {
+    const confirmDelete = window.confirm("Ar tikrai norite ištrinti šią temą? Šis veiksmas yra negrįžtamas.");
+    if (!confirmDelete) return;
+    try {
+      api.delete(`/topics/delete/${themeId}`);
+      setThemes(themes.filter(theme => theme.id !== themeId));
+      alert("Tema sėkmingai ištrinta.");
+    } catch (error) {
+      console.error("Failed to delete theme:", error);
+      alert("Klaida trinant temą. Bandykite dar kartą.");
+    }
+  };
+
   return (
     <div className="max-w-5xl mx-auto mt-10 px-4">
       <div className="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
@@ -52,15 +65,22 @@ export default function Home() {
             className="card bg-base-100 shadow-md hover:shadow-lg transition p-6"
           >
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
-              <h2 className="text-2xl font-semibold text-primary mb-2 sm:mb-0">
-                {theme.title}
-              </h2>
+              <div className="flex items-center gap-4">
+                <img
+                  src={`http://localhost:8000${theme.image ?? '/static/uploads/noImage.png'}`}
+                  alt=""
+                  style={{ maxWidth: "80px", maxHeight: "80px" }}
+                />
+                <h2 className="text-2xl font-semibold text-primary mb-2 sm:mb-0">
+                  {theme.title}
+                </h2>
+              </div>
               <p className="text-sm text-base-content/60">
                 {new Date(theme.modified_at).toLocaleDateString("lt-LT")}
               </p>
             </div>
 
-            <p className="mt-2 text-base-content/80">Aprašymas</p>
+            <p className="mt-2 text-base-content/80">{theme.description}</p>
 
             <div className="mt-4 flex flex-wrap justify-between items-center text-sm text-base-content/70">
               <p>Įrašų: 1</p>
@@ -79,7 +99,7 @@ export default function Home() {
               <Link to={`/temos-redagavimo-forma/${theme.id}`} className="btn btn-soft btn-primary btn-sm">
                 Redaguoti temą
               </Link>
-              <button className="btn btn-soft btn-secondary btn-sm">
+              <button className="btn btn-soft btn-secondary btn-sm" onClick={() => deleteTheme(theme.id)}>
                 Šalinti temą
               </button>
             </div>

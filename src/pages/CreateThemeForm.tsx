@@ -10,6 +10,10 @@ export function CreateThemeForm() {
   const [image, setImage] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
 
+  type UploadImageResponse = {
+    url: string;
+  };
+
   const navigate = useNavigate();
 
   const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -26,25 +30,43 @@ export function CreateThemeForm() {
   };
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  try {
-    const createdTopic = await api.post<ThemeRequest>("/topics/create", {
-      title,
-      image_link: ""
-    });
+    try {
+      let imageUrl = "";
 
-    console.log("Created topic:", createdTopic);
+      // 1. Upload image if user selected one
+      if (image) {
+        const formData = new FormData();
+        formData.append("image", image);
 
-    setTitle("");
-    setDescription("");
+        const uploadRes = await api.post<UploadImageResponse>("/topics/upload-image", formData, {
+          headers: { "Content-Type": "multipart/form-data" }
+        });
 
-    navigate("/");
-  } catch (error) {
-    console.error("Failed to create topic:", error);
-    alert("Klaida kuriant temą. Patikrinkite duomenis.");
-  }
-};
+        imageUrl = uploadRes.url; // backend returns the URL
+      }
+
+      // 2. Create topic using the returned image URL
+      const createdTopic = await api.post<ThemeRequest>("/topics/create", {
+        title,
+        description,
+        image_link: imageUrl
+      });
+
+      console.log("Created topic:", createdTopic);
+
+      setTitle("");
+      setDescription("");
+      setImage(null);
+      setPreview(null);
+      navigate("/");
+
+    } catch (error) {
+      console.error("Failed to create topic:", error);
+      alert("Klaida kuriant temą. Patikrinkite duomenis.");
+    }
+  };
 
 
   return (
@@ -75,7 +97,6 @@ export function CreateThemeForm() {
             placeholder="Įveskite temos aprašymą"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            required
           ></textarea>
         </div>
 
@@ -88,6 +109,7 @@ export function CreateThemeForm() {
             accept="image/*"
             className="file-input file-input-bordered w-full"
             onChange={handleImageChange}
+            required
           />
           {preview && (
             <div className="mt-4 flex justify-center">
