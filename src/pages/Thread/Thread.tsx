@@ -1,7 +1,11 @@
 import {useParams, Link, Outlet} from "react-router-dom";
+import {useState} from "react";
+import CommentsSection from "./CommentsSection";
 
 export default function Thread() {
   const { themeId, postId } = useParams<{ themeId: string; postId: string }>();
+  const [showComments, setShowComments] = useState(false);
+
 
   const mockPosts = [
     {
@@ -64,9 +68,18 @@ export default function Thread() {
           <Link to="/" className="btn btn-outline">
             Pagrindinis
           </Link>
-          <Link to="komentarai" className="btn btn-soft btn-primary">
-            Komentarai
-          </Link>
+          <button
+        className="btn btn-soft btn-primary"
+        onClick={() => setShowComments((prev) => !prev)}
+      >
+        {showComments ? "Slėpti komentarus" : "Rodyti komentarus"}
+      </button>
+
+      {showComments && (
+        <div className="mt-6">
+          <CommentsSection />
+        </div>
+      )}
         </div>
 
         <div className="mt-8">
