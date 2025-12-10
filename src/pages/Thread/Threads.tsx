@@ -1,39 +1,47 @@
 import { useParams, Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { api } from "../../api/apiClient";
+import type { PostResponse } from "../../types/Post";
+import type { ThemeResponse } from "../../types/Theme";
 
 export default function Threads() {
   const { themeId } = useParams<{ themeId: string }>();
+  const [theme, setTheme] = useState<ThemeResponse | null>(null);
+  const [posts, setPosts] = useState<PostResponse[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const mockThemes = [
-    { id: 1, title: "Kaip nugalėti Ornstein ir Smough?" },
-    { id: 2, title: "Geriausi ginklai pradedantiesiems" },
-  ];
+  useEffect(() => {
+    const loadData = async () => {
+      if (!themeId) return;
 
-  const mockPosts = [
-    {
-      id: 1,
-      themeId: 1,
-      author: "Solaire",
-      date: "2025-10-22",
-      content: "Patariu laikytis arti Ornstein ir naudoti riedėjimą į vidų.",
-    },
-    {
-      id: 2,
-      themeId: 1,
-      author: "Gwyn",
-      date: "2025-10-23",
-      content: "Naudoju magiją ir laikau juos atokiau. Veikia puikiai!",
-    },
-    {
-      id: 3,
-      themeId: 2,
-      author: "Artorias",
-      date: "2025-10-25",
-      content: "Claymore ir Uchigatana puikūs ginklai žaidimo pradžiai.",
-    },
-  ];
+      setLoading(true);
+      try {
+        const [allPosts, topicData] = await Promise.all([
+          api.get<PostResponse[]>("posts/read"),
+          api.get<ThemeResponse>(`topics/read/${themeId}`)
+        ]);
 
-  const theme = mockThemes.find((t) => t.id === Number(themeId));
-  const posts = mockPosts.filter((p) => p.themeId === Number(themeId));
+        setTheme(topicData);
+        setPosts(allPosts.filter((post) => post.topic.id === Number(themeId)));
+      } catch (error) {
+        console.error("Nepavyko gauti įrašų:", error);
+        setTheme(null);
+        setPosts([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, [themeId]);
+
+  if (loading) {
+    return (
+      <div className="max-w-4xl mx-auto mt-10 text-center">
+        <span className="loading loading-spinner loading-lg"></span>
+      </div>
+    );
+  }
 
   if (!theme) {
     return (
@@ -48,7 +56,12 @@ export default function Threads() {
 
   return (
     <div className="max-w-4xl mx-auto mt-10 px-4">
-      <h1 className="text-4xl font-bold text-center mb-8">{theme.title}</h1>
+      <div className="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
+        <h1 className="text-4xl font-bold text-center sm:text-left">{theme.title}</h1>
+        <Link to={`/irasai/${themeId}/naujas`} className="btn btn-primary">
+          ➕ Sukurti naują įrašą
+        </Link>
+      </div>
 
       {posts.length === 0 ? (
         <p className="text-center text-base-content/70">
@@ -63,12 +76,18 @@ export default function Threads() {
               className="block bg-base-100 shadow-md rounded-lg p-5 hover:bg-base-200 transition"
             >
               <div className="flex justify-between items-center mb-2">
-                <p className="font-semibold">{post.author}</p>
+                <div>
+                  <h3 className="font-semibold text-lg">{post.title}</h3>
+                  <p className="text-sm text-base-content/70">{post.author.nickname}</p>
+                </div>
                 <p className="text-sm text-base-content/60">
-                  {new Date(post.date).toLocaleDateString("lt-LT")}
+                  {new Date(post.modified_at || post.created_at).toLocaleDateString("lt-LT")}
                 </p>
               </div>
-              <p className="text-base-content/80 line-clamp-2">{post.content}</p>
+              <p className="text-base-content/80 line-clamp-2">{post.summary || "Nėra santraukos"}</p>
+              <div className="mt-2 text-sm text-base-content/60">
+                Peržiūros: {post.view_count}
+              </div>
             </Link>
           ))}
         </div>

@@ -19,6 +19,9 @@ import CommentsSection from "./pages/Thread/CommentsSection.tsx";
 import PublicProfile from "./pages/Profile/PublicProfile.tsx";
 import RelatedUsers from "./pages/Profile/RelatedUsers.tsx";
 import PendingInvites from "./pages/Profile/PendingInvites.tsx";
+import MyPosts from "./pages/Profile/MyPosts.tsx";
+import { CreatePostForm } from "./pages/Thread/CreatePostForm.tsx";
+import { EditPostForm } from "./pages/Thread/EditPostForm.tsx";
 
 function App() {
   return (
@@ -30,6 +33,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/profilis/mano" element={<Profile />}>
+              <Route path="mano-irasai" element={<MyPosts />} />
               <Route path="megstami-irasai" element={<LikedThreads />} />
               <Route path="naudotoju-sarasas" element={<RelatedUsers />} />
               <Route path="draugu-pakvietimai" element={<PendingInvites />} />
@@ -45,9 +49,9 @@ function App() {
             <Route path="/prisijungimas" element={<Login />} />
             <Route path="/registracija" element={<Registration />} />
             <Route path="/irasai/:themeId" element={<Threads />} />
-            <Route path="/irasai/:themeId/:postId" element={<Thread />}>
-              <Route path="redaguoti"/>
-            </Route>
+            <Route path="/irasai/:themeId/naujas" element={<CreatePostForm />} />
+            <Route path="/irasai/:themeId/:postId/redaguoti" element={<EditPostForm />} />
+            <Route path="/irasai/:themeId/:postId" element={<Thread />} />
             <Route path="/temos-statistika/:themeId" element={<ThemeStatistic />}/>
           </Routes>
         </main>

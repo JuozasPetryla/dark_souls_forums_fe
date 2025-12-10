@@ -144,6 +144,8 @@ export default function Profile() {
       {/* Buttons */}
       <div className="flex flex-wrap justify-center gap-3">
 
+        <Link to="mano-irasai" className="btn btn-outline btn-primary">Mano įrašai</Link>
+
         <Link to="megstami-irasai" className="btn btn-outline btn-primary">Pamėgti įrašai</Link>
 
         <Link to="draugu-pakvietimai" className="btn btn-outline btn-primary">
