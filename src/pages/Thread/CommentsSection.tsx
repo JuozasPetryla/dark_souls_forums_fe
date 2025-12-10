@@ -27,7 +27,7 @@ export default function CommentSection() {
   const [editingText, setEditingText] = useState("");
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
   const [iqLoading, setIqLoading] = useState<number | null>(null);
-
+  const [error, setError] = useState<string | null>(null);
 
   const token = localStorage.getItem("access_token");
   
@@ -35,12 +35,10 @@ export default function CommentSection() {
     baseURL: "http://localhost:8000",
     headers: { Authorization: "Bearer " + token }
   });
-  //const FIXED_PROMPT = "Rate the IQ of this comment from 1-200";
 
   useEffect(() => {
     if (!token) return;
     const fetchCurrentUser = async () => {
-      //const token = localStorage.getItem("JWT");
       console.log("CALLING:", `${api.defaults.baseURL}/api/v1/auth/me`);
       console.log("TOKEN SENT:", token);
       try {
@@ -84,7 +82,13 @@ export default function CommentSection() {
   }, [numericPostId, token]);
 
   const postComment = async () => {
-    if (!newComment.trim() || currentUserId === null) return;
+    if (!newComment.trim()) {
+      setError("Komentaras negali būti tuščias.");
+      return;
+    }
+    if (currentUserId === null) {
+      return;
+    }
 
     try {
       const res = await api.post("/api/v1/comments/create", {
@@ -109,20 +113,27 @@ export default function CommentSection() {
       ]);
 
       setNewComment("");
+      setError(null);
     } catch (err) {
       console.error(err);
+      setError("Nepavyko pridėti komentaro, bandykite vėl");
     }
   };
 
   const saveEdit = async (commentId: number) => {
-    if (!editingText.trim()) return;
+    if (!editingText.trim()) {
+      setError("Redaguojamas komentaras negali būti tuščias.");
+      return;
+    }
     try {
       await api.put(`/api/v1/comments/update/${commentId}`, { content: editingText });
       setComments(comments.map(c => (c.id === commentId ? { ...c, text: editingText } : c)));
       setEditingId(null);
       setEditingText("");
+      setError(null);
     } catch (err) {
       console.error("Failed to update comment", err);
+      setError("Nepavyko atnaujinti komentaro.");
     }
   };
 
@@ -130,8 +141,11 @@ export default function CommentSection() {
     try {
       await api.delete(`/api/v1/comments/delete/${commentId}`);
       setComments(comments.filter(c => c.id !== commentId));
+      
     } catch (err) {
       console.error("Failed to delete comment", err);
+      setError("Nepavyko ištrinti komentaro.");
+      
     }
   };
 
@@ -145,7 +159,9 @@ export default function CommentSection() {
         rows={4}
         value={newComment}
         onChange={e => setNewComment(e.target.value)}
-      /> </label> <div className="flex justify-end"> <button className="btn btn-soft btn-primary" onClick={postComment}>
+      /> </label>
+        {error && <p className="text-red-500">{error}</p>}
+       <div className="flex justify-end"> <button className="btn btn-soft btn-primary" onClick={postComment}>
         Post Comment </button> </div> </div>
 
     <h2 className="text-2xl font-bold text-center text-primary">Komentarai</h2>
