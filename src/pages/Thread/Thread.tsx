@@ -3,6 +3,7 @@ import {useState, useEffect} from "react";
 import CommentsSection from "./CommentsSection";
 import { api } from "../../api/apiClient";
 import type { PostDetail } from "../../types/Post";
+import { GenerateSummaryButton } from "../../components/GenerateSummaryButton";
 
 interface CurrentUser {
   id: number;
@@ -17,6 +18,7 @@ export default function Thread() {
   const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
   const [isFavorite, setIsFavorite] = useState(false);
   const [checkingFavorite, setCheckingFavorite] = useState(true);
+  const [displaySummary, setDisplaySummary] = useState<string | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -27,9 +29,11 @@ export default function Thread() {
       try {
         const data = await api.get<PostDetail>(`posts/read/${postId}`);
         setPost(data);
+        setDisplaySummary(data.summary || null);
       } catch (error) {
         console.error("Nepavyko gauti įrašo:", error);
         setPost(null);
+        setDisplaySummary(null);
       } finally {
         setLoading(false);
       }
@@ -168,10 +172,25 @@ export default function Thread() {
           </div>
 
           <p className="text-base-content/80 leading-relaxed whitespace-pre-line">{post.content}</p>
+
+          {displaySummary && (
+            <div className="mt-4 p-4 bg-blue-50 border-l-4 border-blue-500 rounded">
+              <p className="text-sm font-semibold text-blue-900 mb-2">📋 Santrauka:</p>
+              <p className="text-blue-800 text-sm">{displaySummary}</p>
+            </div>
+          )}
         </div>
 
         {currentUser && currentUser.id === post.author.id && (
-          <div className="mt-4 flex gap-2 justify-end">
+          <div className="mt-4 flex flex-wrap gap-2 justify-end">
+            {!displaySummary && (
+              <GenerateSummaryButton
+                postId={Number(postId)}
+                currentSummary={displaySummary}
+                isAuthor={true}
+                onSummaryGenerated={(newSummary) => setDisplaySummary(newSummary)}
+              />
+            )}
             <Link
               to={`/irasai/${post.topic.id}/${postId}/redaguoti`}
               className="btn btn-soft btn-primary btn-sm"

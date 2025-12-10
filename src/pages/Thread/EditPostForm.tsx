@@ -3,6 +3,7 @@ import type { FormEvent } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { api } from "../../api/apiClient";
 import type { PostDetail } from "../../types/Post";
+import { GenerateSummaryButton } from "../../components/GenerateSummaryButton";
 
 export function EditPostForm() {
   const { themeId, postId } = useParams<{ themeId: string; postId: string }>();
@@ -12,6 +13,7 @@ export function EditPostForm() {
   const [content, setContent] = useState<string>("");
   const [summary, setSummary] = useState<string>("");
   const [loading, setLoading] = useState(true);
+  const [currentUser, setCurrentUser] = useState<{ id: number } | null>(null);
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -19,10 +21,14 @@ export function EditPostForm() {
 
       setLoading(true);
       try {
-        const post = await api.get<PostDetail>(`posts/read/${postId}`);
+        const [post, user] = await Promise.all([
+          api.get<PostDetail>(`posts/read/${postId}`),
+          api.get<{ id: number }>("auth/me")
+        ]);
         setTitle(post.title);
         setContent(post.content);
         setSummary(post.summary || "");
+        setCurrentUser(user);
       } catch (error) {
         console.error("Failed to fetch post:", error);
         alert("Nepavyko gauti įrašo duomenų.");
@@ -86,6 +92,16 @@ export function EditPostForm() {
           <label className="label">
             <span className="label-text font-semibold">Santrauka (neprivaloma)</span>
           </label>
+          {currentUser && (
+            <div className="mb-3">
+              <GenerateSummaryButton
+                postId={Number(postId)}
+                currentSummary={summary || null}
+                isAuthor={true}
+                onSummaryGenerated={(newSummary) => setSummary(newSummary)}
+              />
+            </div>
+          )}
           <input
             type="text"
             placeholder="Trumpa įrašo santrauka"
