@@ -1,14 +1,15 @@
 import { Link } from "react-router-dom";
 import { api } from "../api/apiClient";
 import type { ThemeResponse } from "../types/Theme";
+import type { AuthUser } from "../types/Auth";
 import { useEffect, useState } from "react";
 
 export default function Home() {
 
   const [themes, setThemes] = useState<ThemeResponse[]>([]);
   const [loading, setLoading] = useState(true);
-
-  
+  const [currentUserRole, setCurrentUserRole] = useState<string | null>(null);
+  const token = localStorage.getItem("access_token");
 
   useEffect(() => {
     async function loadThemes() {
@@ -24,6 +25,23 @@ export default function Home() {
 
     loadThemes();
   }, []);
+
+  useEffect(() => {
+    if (!token) return;
+    const fetchCurrentUser = async () => {
+      //const token = localStorage.getItem("JWT");
+      try {
+        const res = await api.get<AuthUser>("auth/me");
+        // console.log("USER RESPONSE:", res.role);
+        setCurrentUserRole(res.role);
+        // console.log("CURRENT USER ROLE:", res.role)
+      } catch (err) {
+        console.error("Failed to fetch current user", err);
+      }
+    };
+
+    fetchCurrentUser();
+  }, [token]);
 
   if (loading) {
     return (
@@ -53,9 +71,11 @@ export default function Home() {
           Temų sąrašas
         </h1>
 
-        <Link to="/temos-kurimo-forma" className="btn btn-primary">
-          ➕ Sukurti naują temą
-        </Link>
+        {currentUserRole === "admin" && (
+          <Link to="/temos-kurimo-forma" className="btn btn-primary">
+            ➕ Sukurti naują temą
+          </Link>
+        )}
       </div>
 
       <div className="space-y-6">
@@ -102,12 +122,16 @@ export default function Home() {
               >
                 Temos statistika
               </Link>
-              <Link to={`/temos-redagavimo-forma/${theme.id}`} className="btn btn-soft btn-primary btn-sm">
-                Redaguoti temą
-              </Link>
-              <button className="btn btn-soft btn-secondary btn-sm" onClick={() => deleteTheme(theme.id)}>
-                Šalinti temą
-              </button>
+              {currentUserRole === "admin" && (
+                <>
+                  <Link to={`/temos-redagavimo-forma/${theme.id}`} className="btn btn-soft btn-primary btn-sm">
+                    Redaguoti temą
+                  </Link>
+                  <button className="btn btn-soft btn-secondary btn-sm" onClick={() => deleteTheme(theme.id)}>
+                    Šalinti temą
+                  </button>
+                </>
+              )}
             </div>
           </div>
         ))}

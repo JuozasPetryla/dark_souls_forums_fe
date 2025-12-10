@@ -3,6 +3,7 @@ import type { ChangeEvent, FormEvent } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { api } from "../api/apiClient";
 import type { ThemeRequest, ThemeResponse } from "../types/Theme";
+import type { AuthUser } from "../types/Auth";
 
 export function EditThemeForm() {
   const { themeId } = useParams<{ themeId: string }>();
@@ -12,6 +13,9 @@ export function EditThemeForm() {
   const [description, setDescription] = useState<string>("");
   const [image, setImage] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
+
+  const [currentUserRole, setCurrentUserRole] = useState<string | null>(null);
+  const token = localStorage.getItem("access_token");
 
   type UploadImageResponse = {
     url: string;
@@ -34,6 +38,23 @@ export function EditThemeForm() {
 
     if (themeId) fetchTopic();
   }, [themeId]);
+
+  useEffect(() => {
+    if (!token) return;
+    const fetchCurrentUser = async () => {
+      //const token = localStorage.getItem("JWT");
+      try {
+        const res = await api.get<AuthUser>("auth/me");
+        // console.log("USER RESPONSE:", res.role);
+        setCurrentUserRole(res.role);
+        // console.log("CURRENT USER ROLE:", res.role)
+      } catch (err) {
+        console.error("Failed to fetch current user", err);
+      }
+    };
+
+    fetchCurrentUser();
+  }, [token]);
 
   const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
@@ -94,6 +115,15 @@ export function EditThemeForm() {
       alert("Klaida redaguojant temą. Patikrinkite duomenis.");
     }
   };
+
+  if (currentUserRole !== "admin") {
+    return (
+      <div className="max-w-3xl mx-auto mt-10 bg-base-100 shadow-md rounded-lg p-8">
+        <h1 className="text-3xl font-bold text-center mb-6">Prieiga uždrausta</h1>
+        <p className="text-center">Atsiprašome, bet tik administratoriai gali redaguoti temas.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-3xl mx-auto mt-10 bg-base-100 shadow-md rounded-lg p-8">
