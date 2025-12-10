@@ -1,30 +1,57 @@
 import { useParams, Link } from "react-router-dom";
+import { useState, useEffect } from 'react';
+import type { ThemeStatistics } from "../types/Theme";
+import { api } from "../api/apiClient";
 
 export default function ThemeStatistic() {
   const { themeId } = useParams<{ themeId: string }>();
+  const [viewerCount, setViewerCount] = useState(0);
+  const [stats, setStats] = useState<ThemeStatistics>();
+  const [loading, setLoading] = useState(true);
 
-  const mockStats = [
-    {
-      themeId: 1,
-      title: "Kaip nugalėti Ornstein ir Smough?",
-      totalPosts: 12,
-      mostActiveUser: "Solaire",
-      avgReplies: 8.4,
-      lastUpdated: "2025-11-02",
-    },
-    {
-      themeId: 2,
-      title: "Geriausi ginklai pradedantiesiems",
-      totalPosts: 5,
-      mostActiveUser: "Artorias",
-      avgReplies: 3.2,
-      lastUpdated: "2025-10-30",
-    },
-  ];
+  useEffect(() => {
+    async function loadTheme() {
+      try {
+        const data = await api.get<ThemeStatistics>(`topics/read/statistics/${themeId}`);
+        console.log("Fetched theme statistics:", data);
+        setStats(data);
+      } catch (error) {
+        console.error("Failed to fetch themes:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
 
-  const stat = mockStats.find((s) => s.themeId === Number(themeId));
+    loadTheme();
+  }, []);
 
-  if (!stat) {
+  useEffect(() => {
+    // Connect to WebSocket
+    const ws = new WebSocket(`ws://localhost:8000/ws/topic/${themeId}`);
+    
+    ws.onmessage = (event) => {
+      setViewerCount(parseInt(event.data));
+    };
+    
+    ws.onerror = (error) => {
+      console.error('WebSocket error:', error);
+    };
+    
+    // Cleanup on unmount
+    return () => {
+      ws.close();
+    };
+  }, [themeId]);
+
+  if (loading) {
+    return (
+      <div className="max-w-5xl mx-auto mt-10 px-4 text-center">
+        <span className="loading loading-spinner loading-lg"></span>
+      </div>
+    );
+  }
+
+  if (!stats) {
     return (
       <div className="text-center mt-20">
         <h2 className="text-2xl font-bold text-error">Temos statistika nerasta 😢</h2>
@@ -39,7 +66,7 @@ export default function ThemeStatistic() {
     <div className="flex justify-center items-center min-h-screen bg-base-200">
       <div className="card w-full max-w-3xl bg-base-100 shadow-xl p-8">
         <h1 className="text-3xl font-bold text-center mb-8">
-          {stat.title} – Temos statistika
+          {stats.title} – Temos statistika
         </h1>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -47,29 +74,30 @@ export default function ThemeStatistic() {
             <div className="stat-title text-sm text-base-content/70">
               Įrašų skaičius
             </div>
-            <div className="stat-value text-primary">{stat.totalPosts}</div>
+            <div className="stat-value text-primary">{stats.totalPosts}</div>
           </div>
 
           <div className="stat bg-base-200 rounded-xl shadow p-4">
             <div className="stat-title text-sm text-base-content/70">
-              Vidutinis atsakymų skaičius
+              Komentarų skaičius
             </div>
-            <div className="stat-value text-secondary">{stat.avgReplies}</div>
+            <div className="stat-value text-secondary">{stats.totalComments}</div>
           </div>
 
-          <div className="stat bg-base-200 rounded-xl shadow p-4 col-span-1 sm:col-span-2">
+          <div className="stat bg-base-200 rounded-xl shadow p-4">
             <div className="stat-title text-sm text-base-content/70">
-              Aktyviausias naudotojas
+              Temos peržiūrų skaičius
             </div>
-            <div className="stat-value text-accent font-semibold">
-              {stat.mostActiveUser}
+            <div className="stat-value text-primary">{stats.totalViews}</div>
+          </div>
+
+          <div className="stat bg-base-200 rounded-xl shadow p-4">
+            <div className="stat-title text-sm text-base-content/70">
+              Dabartinių žiūrovų skaičius
             </div>
+            <div className="stat-value text-secondary">{viewerCount}</div>
           </div>
         </div>
-
-        <p className="text-center mt-6 text-sm text-base-content/60">
-          Atnaujinta: {stat.lastUpdated}
-        </p>
 
         <div className="text-center mt-8 space-x-3">
           <Link to="/" className="btn btn-outline">
