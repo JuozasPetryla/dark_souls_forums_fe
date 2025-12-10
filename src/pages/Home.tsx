@@ -75,6 +75,12 @@ export default function Home() {
                   {theme.title}
                 </h2>
               </div>
+              <h2 className="text-2xl font-semibold text-primary mb-2 sm:mb-0">
+                {theme.title}
+              </h2>
+              <Link to={`/profile/${theme.author.id}`}>
+                  {theme.author.nickname}
+              </Link>
               <p className="text-sm text-base-content/60">
                 {new Date(theme.modified_at).toLocaleDateString("lt-LT")}
               </p>

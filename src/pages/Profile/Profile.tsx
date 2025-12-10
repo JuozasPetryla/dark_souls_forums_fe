@@ -140,20 +140,24 @@ export default function Profile() {
         </div>
       </div>
 
+      {/* Navigation Buttons */}
       {/* Buttons */}
       <div className="flex flex-wrap justify-center gap-3">
 
-        <Link to="megstami-irasai" className="btn btn-outline btn-primary">
-          Pamėgti įrašai
+        <Link to="megstami-irasai" className="btn btn-outline btn-primary">Pamėgti įrašai</Link>
+
+        <Link to="draugu-pakvietimai" className="btn btn-outline btn-primary">
+          Draugų pakvietimai
         </Link>
 
         <Link to="naudotoju-sarasas" className="btn btn-outline btn-secondary">
-          Susietų naudotojų sąrašas
+          Ryšių sąrašas
         </Link>
 
         <Link to="zaidimu-statistika" className="btn btn-outline btn-primary">
           Žaidimų statistika
         </Link>
+
 
         {isMyProfile && (
           <>
@@ -161,9 +165,9 @@ export default function Profile() {
               Susieti Steam paskyrą
             </button>
 
-            <Link to="redaguoti" className="btn btn-soft btn-primary">
-              Redaguoti
-            </Link>
+        <Link to="redaguoti" className="btn btn-soft btn-primary">
+          Redaguoti
+        </Link>
 
             <button className="btn btn-soft btn-error" onClick={() => setShowDeleteModal(true)}>
               Šalinti profilį

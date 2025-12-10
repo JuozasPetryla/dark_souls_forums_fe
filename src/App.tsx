@@ -10,11 +10,15 @@ import Registration from "./pages/Registration";
 import Threads from "./pages/Thread/Threads";
 import ThemeStatistic from "./pages/ThemeStatictic";
 import LikedThreads from "./pages/Profile/LikedThreads";
-import Users from "./pages/Profile/Users";
+import Users from "./pages/Profile/RelatedUsers.tsx";
 import Thread from "./pages/Thread/Thread";
 import {EditThemeForm} from "./pages/EditThemeForm.tsx";
 import EditProfile from "./pages/Profile/EditProfileForm.tsx";
 import GameStats from "./pages/Profile/GameStats.tsx";
+import CommentsSection from "./pages/Thread/CommentsSection.tsx";
+import PublicProfile from "./pages/Profile/PublicProfile.tsx";
+import RelatedUsers from "./pages/Profile/RelatedUsers.tsx";
+import PendingInvites from "./pages/Profile/PendingInvites.tsx";
 
 function App() {
   return (
@@ -27,10 +31,12 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/profilis/mano" element={<Profile />}>
               <Route path="megstami-irasai" element={<LikedThreads />} />
-              <Route path="naudotoju-sarasas" element={<Users />} />
+              <Route path="naudotoju-sarasas" element={<RelatedUsers />} />
+              <Route path="draugu-pakvietimai" element={<PendingInvites />} />
               <Route path="redaguoti" element={<EditProfile/>} />
               <Route path="zaidimu-statistika" element={<GameStats/>} />
             </Route>
+            <Route path="/profile/:id" element={<PublicProfile />} />
             <Route path="/profilis/:userId" element={<Profile />}>
               <Route path="zaidimu-statistika" element={<GameStats/>} />
             </Route>
