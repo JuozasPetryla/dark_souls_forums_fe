@@ -108,10 +108,6 @@ export default function Home() {
 
             <p className="mt-2 text-base-content/80">{theme.description}</p>
 
-            <div className="mt-4 flex flex-wrap justify-between items-center text-sm text-base-content/70">
-              <p>Įrašų: 1</p>
-            </div>
-
             <div className="mt-4 flex flex-wrap gap-2 justify-end">
               <Link to={`/irasai/${theme.id}`} className="btn btn-outline btn-sm">
                 Peržiūrėti temą
