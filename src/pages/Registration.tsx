@@ -37,7 +37,7 @@ export default function Registration() {
 
       alert("Registracija sėkminga!");
 
-      navigate("/profilis");
+      navigate("/profilis/mano");
 
     } catch (err: any) {
       console.error("Registration failed:", err);

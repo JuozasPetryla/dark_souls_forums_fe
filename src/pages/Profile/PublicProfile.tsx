@@ -33,7 +33,7 @@ export default function PublicProfile() {
         const me = await api.get<{ id: number }>("/profiles/profile/me");
 
         if (id && Number(id) === me.id) {
-          navigate("/profilis", { replace: true });
+          navigate("/profilis/mano", { replace: true });
         }
       } catch (err) {
         console.error("Failed to load self", err);

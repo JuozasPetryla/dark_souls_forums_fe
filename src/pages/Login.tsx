@@ -27,7 +27,7 @@ export default function Login() {
       localStorage.setItem("access_token", token);
 
       alert("Prisijungta sėkmingai!");
-      navigate("/profilis");
+      navigate("/profilis/mano");
 
     } catch (err: any) {
       console.error("Login failed:", err);
