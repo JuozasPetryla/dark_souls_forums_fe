@@ -150,8 +150,10 @@ export default function CommentSection() {
   };
 
   
-  return (<div className="max-w-3xl mx-auto bg-base-200 p-6 rounded-box shadow-md mt-10 space-y-6">
-    {/* New Comment */} <div className="space-y-4"> <label className="font-semibold text-indigo-700">
+  return (
+  <div className="max-w-3xl mx-auto bg-base-200 p-6 rounded-box shadow-md mt-10 space-y-6">
+    {/* New Comment */} { token && 
+    <div className="space-y-4"> <label className="font-semibold text-indigo-700">
       Palikite komentarą:
       <textarea
         placeholder="Write your comment..."
@@ -162,7 +164,9 @@ export default function CommentSection() {
       /> </label>
         {error && <p className="text-red-500">{error}</p>}
        <div className="flex justify-end"> <button className="btn btn-soft btn-primary" onClick={postComment}>
-        Post Comment </button> </div> </div>
+        Post Comment </button> </div> 
+      </div> 
+      }
 
     <h2 className="text-2xl font-bold text-center text-primary">Komentarai</h2>
 

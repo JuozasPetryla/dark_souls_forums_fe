@@ -10,6 +10,8 @@ export default function Threads() {
   const [posts, setPosts] = useState<PostResponse[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const token = localStorage.getItem("access_token");
+
   useEffect(() => {
     const loadData = async () => {
       if (!themeId) return;
@@ -58,9 +60,11 @@ export default function Threads() {
     <div className="max-w-4xl mx-auto mt-10 px-4">
       <div className="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
         <h1 className="text-4xl font-bold text-center sm:text-left">{theme.title}</h1>
-        <Link to={`/irasai/${themeId}/naujas`} className="btn btn-primary">
-          ➕ Sukurti naują įrašą
-        </Link>
+        { token &&
+          <Link to={`/irasai/${themeId}/naujas`} className="btn btn-primary">
+            ➕ Sukurti naują įrašą
+          </Link>
+        }
       </div>
 
       {posts.length === 0 ? (
