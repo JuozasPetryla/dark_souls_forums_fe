@@ -13,7 +13,7 @@ export interface Comment {
   userVote?: "positive" | "negative" | null;
   rating_id?: number | null;
   author_id?: number;
-  comment_iq?: number | null
+  author_iq?: number | null
 }
 
 
@@ -26,6 +26,8 @@ export default function CommentSection() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editingText, setEditingText] = useState("");
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
+  const [iqLoading, setIqLoading] = useState<number | null>(null);
+
 
   const token = localStorage.getItem("access_token");
   
@@ -33,6 +35,7 @@ export default function CommentSection() {
     baseURL: "http://localhost:8000",
     headers: { Authorization: "Bearer " + token }
   });
+  //const FIXED_PROMPT = "Rate the IQ of this comment from 1-200";
 
   useEffect(() => {
     if (!token) return;
@@ -69,6 +72,8 @@ export default function CommentSection() {
             downvotes: c.downvotes ?? 0,
             userVote: c.userVote ?? null,
             rating_id: c.rating_id || undefined,
+            author_iq: c.author_iq ?? null,
+
           }))
         );
       } catch (err) {
@@ -99,7 +104,7 @@ export default function CommentSection() {
           downvotes: 0,
           userVote: null,
           rating_id: null,
-          comment_iq: null
+          author_iq: null
         }
       ]);
 
@@ -198,36 +203,40 @@ export default function CommentSection() {
           <p className="text-gray-700 leading-relaxed text-left">{comment.text}</p>
 
           {/* Display IQ if calculated */}
-          {comment.comment_iq !== null && (
+          {comment.author_iq !== null && (
             <p className="mt-2 font-semibold text-indigo-700">
-              Comment IQ: {comment.comment_iq}
+              Comment IQ: {comment.author_iq}
             </p>
           )}
 
           {/* Calculate IQ button if not yet calculated */}
-          {comment.comment_iq === null && (
-            <button
-              className="mt-2 btn btn-sm btn-outline btn-primary"
-              onClick={async () => {
-                try {
-                  const res = await api.post(
-                    `/api/v1/comments/${comment.id}/calculate-iq`,
-                    { text: comment.text }
-                  );
-                  // Update the comment in state
-                  setComments(prev =>
-                    prev.map(c =>
-                      c.id === comment.id ? { ...c, comment_iq: res.data.comment_iq } : c
-                    )
-                  );
-                } catch (err) {
-                  console.error("Failed to calculate IQ", err);
-                }
-              }}
-            >
-              Calculate IQ
-            </button>
-          )}
+          {comment.author_iq === null && iqLoading !== comment.id && (
+  <button
+    className="mt-2 btn btn-sm btn-outline btn-primary"
+    onClick={async () => {
+      if (!comment.text?.trim()) return;
+      try {
+        setIqLoading(comment.id); // pažymim, kad vyksta skaičiavimas
+        const res = await api.post(`/api/v1/comments/${comment.id}/calculate-iq`, {
+  text: comment.text
+});
+        setComments(prev =>
+          prev.map(c =>
+            c.id === comment.id ? { ...c, author_iq: res.data.author_iq } : c
+          )
+        );
+      } catch (err: any) {
+        console.error("Failed to calculate IQ", err.response?.data || err);
+      } finally {
+        setIqLoading(null); // baigiam
+      }
+    }}
+  >
+    Calculate IQ
+  </button>
+)}
+
+{iqLoading === comment.id && <p>Calculating IQ...</p>}
         </div>
       )}
     </div>

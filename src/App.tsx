@@ -15,7 +15,6 @@ import Thread from "./pages/Thread/Thread";
 import {EditThemeForm} from "./pages/EditThemeForm.tsx";
 import EditProfile from "./pages/Profile/EditProfileForm.tsx";
 import GameStats from "./pages/Profile/GameStats.tsx";
-import CommentsSection from "./pages/Thread/CommentsSection.tsx";
 
 function App() {
   return (
@@ -26,10 +25,13 @@ function App() {
         <main className="flex-1 w-full max-w-6xl mx-auto px-4 py-8">
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/profilis" element={<Profile />}>
+            <Route path="/profilis/mano" element={<Profile />}>
               <Route path="megstami-irasai" element={<LikedThreads />} />
               <Route path="naudotoju-sarasas" element={<Users />} />
               <Route path="redaguoti" element={<EditProfile/>} />
+              <Route path="zaidimu-statistika" element={<GameStats/>} />
+            </Route>
+            <Route path="/profilis/:userId" element={<Profile />}>
               <Route path="zaidimu-statistika" element={<GameStats/>} />
             </Route>
             <Route path="/temos-kurimo-forma" element={<CreateThemeForm />} />
