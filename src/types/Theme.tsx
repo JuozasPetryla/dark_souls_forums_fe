@@ -19,3 +19,11 @@ export interface ThemeRequest {
     description: string;
     image_link: string;
 }
+
+export interface ThemeStatistics {
+    themeId: number;
+    title: string;
+    totalPosts: number;
+    totalComments: string;
+    totalViews: number;
+}
